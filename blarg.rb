@@ -1,6 +1,7 @@
-require "date"
+require "date" 
 require "nokogiri"
 require "redcarpet"
+require "fileutils"
 
 def directoryPostList(directory)
 	return Dir.entries(directory).reject {|item| item == '.' or item == ".."}	
@@ -21,7 +22,7 @@ def postUpdate()
 	directoryPostList("posts").each { |post|
 		subject = post.slice(post.index(':')..-1).delete(':')
 		date = post.slice(0..(post.index(':'))).delete(':')
-		template = "\t\t\t<li>#{date} &raquo; <a href='posts/#{date}:#{subject}'>#{subject.delete(".html")}</a></li>\n"
+		template = "<li>#{date} &raquo; <a href='posts/#{date}:#{subject.gsub("'", "&#39;")}'>#{subject.gsub(".html", "")}</a></li>\n"
 		newPostList.push(template)
 	}
 
@@ -34,13 +35,13 @@ def postUpdate()
 		htmlDoc.write_to(f, :save_with => "AS_HTML")
 		f.close
 	}
-	FileUtils.mv("posts/#{directoryPostList("posts")[0]}", "../index.html")
+	FileUtils.cp("posts/#{directoryPostList("posts")[0]}", "../index.html")
 end
 
 def applyNewPost(subject, markdownFile)
 		htmlFile = "#{Date.today.to_s}:#{subject}.html"
 		FileUtils.copy_file("template.html", htmlFile)
-		htmlDoc = Nokogiri::HTML(File.open(htmlFile))
+		htmlDoc = Nokogiri::HTML(File.read(htmlFile))
 		content = htmlDoc.at_css(".content")
 		newThing = Redcarpet::Markdown.new(Redcarpet::Render::HTML.new).render(File.read(markdownFile))
 		content.add_child(newThing)
@@ -49,7 +50,7 @@ def applyNewPost(subject, markdownFile)
 			htmlDoc.write_to(f, :save_with => "AS_HTML")
 			f.close
 		}
-		FileUtils.mv(htmlFile, "posts/")
+		FileUtils.mv(htmlFile, "posts")
 		postUpdate()
 end
 
