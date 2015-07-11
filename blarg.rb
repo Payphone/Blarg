@@ -2,6 +2,7 @@ require "date"
 require "nokogiri"
 require "redcarpet"
 require "fileutils"
+require "optparse"
 
 def directoryPostList(directory)
 	return Dir.entries(directory).reject {|item| item == '.' or item == ".."}	
@@ -55,6 +56,7 @@ def applyNewPost(subject, markdownFile)
 end
 
 begin
+	Dir.mkdir("posts") unless File.directory?("posts")
 	if ARGV[0] == nil
 		if htmlPostList("index.html") == directoryPostList("posts")
 			puts "The page is up to date."
