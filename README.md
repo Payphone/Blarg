@@ -1,6 +1,5 @@
 # Blarg
 
-## Introduction
 Blarg is a static blogging engine written in ruby. It currently has a 
 very specific use case, and isn't very flexible. It creates a directory
 for posts with each post sorted as date:subject. The blog index and the
