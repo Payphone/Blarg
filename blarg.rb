@@ -3,6 +3,7 @@ require "nokogiri"
 require "redcarpet"
 require "fileutils"
 require "optparse"
+require "uri"
 
 def directoryPostList(directory)
 	return Dir.entries(directory).reject {|item| item == '.' or item == ".."}	
@@ -36,29 +37,32 @@ def postUpdate()
 		htmlDoc.write_to(f, :save_with => "AS_HTML")
 		f.close
 	}
+
 	FileUtils.cp("posts/#{directoryPostList("posts")[0]}", "../index.html")
 end
 
 def applyNewPost(subject, markdownFile)
-		htmlFile = "#{Date.today.to_s}:#{subject}.html"
-		FileUtils.copy_file("template.html", htmlFile)
-		htmlDoc = Nokogiri::HTML(File.read(htmlFile))
+		postFile = "#{Date.today.to_s}:#{subject}.html"
+		FileUtils.copy_file("template.html", postFile)
+		htmlDoc = Nokogiri::HTML(File.read(postFile))
 		content = htmlDoc.at_css(".content")
-		newThing = Redcarpet::Markdown.new(Redcarpet::Render::HTML.new).render(File.read(markdownFile))
-		content.add_child(newThing)
+		markdownHtml = Redcarpet::Markdown.new(Redcarpet::Render::HTML.new).render(File.read(markdownFile))
+		content.add_child(markdownHtml)
 	
-		File.open(htmlFile, 'w') { |f|
+		File.open(postFile, 'w') { |f|
 			htmlDoc.write_to(f, :save_with => "AS_HTML")
 			f.close
 		}
-		FileUtils.mv(htmlFile, "posts")
+		FileUtils.mv(postFile, "posts")
 		postUpdate()
 end
 
 begin
 	Dir.mkdir("posts") unless File.directory?("posts")
+	abort("Error: template.html does not exist, please create one with a 
+		  spot containing the class 'content'") unless File.file?("template.html")
 	if ARGV[0] == nil
-		if htmlPostList("index.html") == directoryPostList("posts")
+		if htmlPostList("index.html").join('\n') == URI.escape(directoryPostList("posts").join('\n'))
 			puts "The page is up to date."
 		else
 			puts "The page isn't up to date, updating..."
