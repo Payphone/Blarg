@@ -4,8 +4,10 @@ Blarg is a static blogging engine written in ruby. It currently has a
 very specific use case, and isn't very flexible. It creates a directory
 for posts with each post sorted as date:subject. The blog index and the
 website index are updated each time a new post is added. The website 
-index is expected to be one directory higher and named index.html. It 
-requires the gems Nokogiri and Redcarpet.
+index is expected to be one directory higher and named index.html. The
+blog index is expected to be in the same directory as Blarg, and there
+also needs to be a file named "template.html" that has a div tag with 
+a class named content. It requires the gems Nokogiri and Redcarpet.
 
 ## Usage
 
